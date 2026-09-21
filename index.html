@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0b1220" />
+  <meta name="description" content="17 günlük Sayıştay Denetçi Yardımcılığı hızlandırılmış çalışma ve günlük test merkezi." />
+  <title>Sayıştay Çalışma Merkezi</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">S</div>
+        <div>
+          <strong>Sayıştay</strong>
+          <span>17 Günlük Hızlandırılmış Program</span>
+        </div>
+      </div>
+
+      <div class="sidebar-summary">
+        <span class="eyebrow">PROGRAM</span>
+        <strong id="programProgress">1 / 17 test aktif</strong>
+        <div class="mini-track"><span id="programProgressBar"></span></div>
+      </div>
+
+      <nav id="dayNav" class="day-nav" aria-label="Çalışma günleri"></nav>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button id="menuButton" class="menu-button" type="button" aria-label="Gün listesini aç">☰</button>
+        <div>
+          <span class="eyebrow" id="sessionLabel">GÜN 6 · MUHASEBE</span>
+          <h1 id="pageTitle">Gün Sonu Testi</h1>
+        </div>
+        <button id="resetButton" class="ghost-button" type="button">Testi sıfırla</button>
+      </header>
+
+      <section id="emptyState" class="empty-state" hidden>
+        <span class="eyebrow">HAZIRLANIYOR</span>
+        <h2 id="emptyTitle">Bu günün testi henüz eklenmedi.</h2>
+        <p id="emptyText">Program yapısı hazır. İlgili günün testi eklendiğinde burada otomatik açılacak.</p>
+      </section>
+
+      <section id="quizArea">
+        <div class="hero-card">
+          <div>
+            <span class="eyebrow">AKŞAM OTURUMU</span>
+            <h2 id="lessonTitle">Muhasebe — 20 Soruluk Gün Sonu Testi</h2>
+            <p id="topicSummary"></p>
+          </div>
+          <div class="hero-stat">
+            <strong id="heroScore">0/20</strong>
+            <span>doğru</span>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <article><span>Cevaplanan</span><strong id="answeredCount">0</strong></article>
+          <article><span>Doğru</span><strong id="correctCount">0</strong></article>
+          <article><span>Yanlış</span><strong id="wrongCount">0</strong></article>
+          <article><span>Kalan</span><strong id="remainingCount">20</strong></article>
+        </div>
+
+        <div class="progress-card">
+          <div class="progress-head"><span>Test ilerlemesi</span><strong id="progressText">%0</strong></div>
+          <div class="progress-track"><span id="progressBar"></span></div>
+        </div>
+
+        <div id="questions" class="questions"></div>
+
+        <section id="resultCard" class="result-card" hidden>
+          <span class="eyebrow">TEST TAMAMLANDI</span>
+          <h2 id="resultScore">0 / 20</h2>
+          <p id="resultText"></p>
+          <div class="result-actions">
+            <button id="retryWrongButton" class="primary-button" type="button">Yanlışları tekrar çöz</button>
+            <button id="resetBottomButton" class="ghost-button" type="button">Baştan çöz</button>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <div id="overlay" class="overlay" hidden></div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
