@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0b1220" />
-  <meta name="description" content="17 günlük Sayıştay Denetçi Yardımcılığı hızlandırılmış çalışma ve günlük test merkezi." />
+  <meta name="description" content="17 günlük Sayıştay Denetçi Yardımcılığı hızlandırılmış çalışma, konu anlatımı ve günlük test merkezi." />
   <title>Sayıştay Çalışma Merkezi</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
@@ -21,7 +21,7 @@
 
       <div class="sidebar-summary">
         <span class="eyebrow">PROGRAM</span>
-        <strong id="programProgress">1 / 17 test aktif</strong>
+        <strong id="programProgress">6 / 17 test aktif</strong>
         <div class="mini-track"><span id="programProgressBar"></span></div>
       </div>
 
@@ -32,23 +32,40 @@
       <header class="topbar">
         <button id="menuButton" class="menu-button" type="button" aria-label="Gün listesini aç">☰</button>
         <div>
-          <span class="eyebrow" id="sessionLabel">GÜN 6 · MUHASEBE</span>
-          <h1 id="pageTitle">Gün Sonu Testi</h1>
+          <span class="eyebrow" id="sessionLabel">GÜN 1 · MALİYE</span>
+          <h1 id="pageTitle">Konu Anlatımı</h1>
         </div>
         <button id="resetButton" class="ghost-button" type="button">Testi sıfırla</button>
       </header>
 
+      <div class="view-tabs" role="tablist" aria-label="İçerik görünümü">
+        <button id="lessonTab" class="view-tab" type="button" role="tab">Konu Anlatımı</button>
+        <button id="quizTab" class="view-tab" type="button" role="tab">20 Soruluk Test</button>
+      </div>
+
+      <section id="lessonArea" class="lesson-area" hidden>
+        <div class="lesson-hero">
+          <div>
+            <span class="eyebrow">GÜNLÜK DERS NOTU</span>
+            <h2 id="lessonNoteTitle"></h2>
+            <p id="lessonNoteSubtitle"></p>
+          </div>
+          <div class="lesson-badge">KONU<br><strong>ANLATIMI</strong></div>
+        </div>
+        <div id="lessonContent" class="lesson-content"></div>
+      </section>
+
       <section id="emptyState" class="empty-state" hidden>
         <span class="eyebrow">HAZIRLANIYOR</span>
-        <h2 id="emptyTitle">Bu günün testi henüz eklenmedi.</h2>
-        <p id="emptyText">Program yapısı hazır. İlgili günün testi eklendiğinde burada otomatik açılacak.</p>
+        <h2 id="emptyTitle">Bu içerik henüz eklenmedi.</h2>
+        <p id="emptyText"></p>
       </section>
 
       <section id="quizArea">
         <div class="hero-card">
           <div>
             <span class="eyebrow">AKŞAM OTURUMU</span>
-            <h2 id="lessonTitle">Muhasebe — 20 Soruluk Gün Sonu Testi</h2>
+            <h2 id="lessonTitle">20 Soruluk Gün Sonu Testi</h2>
             <p id="topicSummary"></p>
           </div>
           <div class="hero-stat">
@@ -92,6 +109,7 @@
   <script src="quiz-day3.js"></script>
   <script src="quiz-day4.js"></script>
   <script src="quiz-day5.js"></script>
+  <script src="lessons.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
