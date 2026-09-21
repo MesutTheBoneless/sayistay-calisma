@@ -1,16 +1,23 @@
 (() => {
   const data = window.SAYISTAY_DATA;
+  const lessons = window.SAYISTAY_LESSONS || {};
   const letters = 'ABCDE';
   const nav = document.getElementById('dayNav');
   const quizArea = document.getElementById('quizArea');
+  const lessonArea = document.getElementById('lessonArea');
   const emptyState = document.getElementById('emptyState');
   const sidebar = document.querySelector('.sidebar');
   const overlay = document.getElementById('overlay');
+  const lessonTab = document.getElementById('lessonTab');
+  const quizTab = document.getElementById('quizTab');
+  const resetButton = document.getElementById('resetButton');
   const readyDays = new Set(Object.keys(data.quizzes).map(Number));
 
   const params = new URLSearchParams(location.search);
   let selectedDay = Number(params.get('day')) || Math.max(...readyDays);
   if (!data.days.some(d => d.day === selectedDay)) selectedDay = Math.max(...readyDays);
+  let activeView = params.get('view');
+  if (!['lesson', 'quiz'].includes(activeView)) activeView = lessons[selectedDay] ? 'lesson' : 'quiz';
 
   let answers = [];
 
@@ -33,13 +40,18 @@
   }
 
   function renderNav() {
-    nav.innerHTML = data.days.map(day => `
-      <button class="day-button ${day.day === selectedDay ? 'active' : ''}" data-day="${day.day}" type="button">
-        <span class="day-no">${day.day}</span>
-        <span class="day-copy"><strong>${day.lesson} · ${day.date}</strong><span>${day.topics}</span></span>
-        <span class="status-dot ${readyDays.has(day.day) ? 'ready' : ''}" title="${readyDays.has(day.day) ? 'Test hazır' : 'Henüz eklenmedi'}"></span>
-      </button>
-    `).join('');
+    nav.innerHTML = data.days.map(day => {
+      const hasQuiz = readyDays.has(day.day);
+      const hasLesson = Boolean(lessons[day.day]);
+      const statusTitle = hasQuiz && hasLesson ? 'Konu anlatımı ve test hazır' : hasQuiz ? 'Test hazır' : hasLesson ? 'Konu anlatımı hazır' : 'Henüz eklenmedi';
+      return `
+        <button class="day-button ${day.day === selectedDay ? 'active' : ''}" data-day="${day.day}" type="button">
+          <span class="day-no">${day.day}</span>
+          <span class="day-copy"><strong>${day.lesson} · ${day.date}</strong><span>${day.topics}</span></span>
+          <span class="status-dot ${hasQuiz || hasLesson ? 'ready' : ''}" title="${statusTitle}"></span>
+        </button>
+      `;
+    }).join('');
 
     nav.querySelectorAll('.day-button').forEach(button => {
       button.addEventListener('click', () => selectDay(Number(button.dataset.day)));
@@ -49,29 +61,73 @@
     document.getElementById('programProgressBar').style.width = `${Math.round((readyDays.size / data.days.length) * 100)}%`;
   }
 
+  function updateUrl() {
+    const url = new URL(location.href);
+    url.searchParams.set('day', String(selectedDay));
+    url.searchParams.set('view', activeView);
+    history.replaceState({}, '', url);
+  }
+
   function selectDay(day) {
     selectedDay = day;
-    const url = new URL(location.href);
-    url.searchParams.set('day', String(day));
-    history.replaceState({}, '', url);
+    activeView = lessons[day] ? 'lesson' : 'quiz';
+    updateUrl();
     closeSidebar();
     render();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  function render() {
-    renderNav();
-    const meta = data.days.find(d => d.day === selectedDay);
+  function selectView(view) {
+    activeView = view;
+    updateUrl();
+    render();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function renderTabs() {
+    const hasLesson = Boolean(lessons[selectedDay]);
+    const hasQuiz = Boolean(data.quizzes[selectedDay]);
+    lessonTab.classList.toggle('active', activeView === 'lesson');
+    quizTab.classList.toggle('active', activeView === 'quiz');
+    lessonTab.classList.toggle('unavailable', !hasLesson);
+    quizTab.classList.toggle('unavailable', !hasQuiz);
+    lessonTab.setAttribute('aria-selected', String(activeView === 'lesson'));
+    quizTab.setAttribute('aria-selected', String(activeView === 'quiz'));
+    lessonTab.title = hasLesson ? 'Konu anlatımını aç' : 'Konu anlatımı henüz eklenmedi';
+    quizTab.title = hasQuiz ? 'Gün sonu testini aç' : 'Test henüz eklenmedi';
+  }
+
+  function showEmpty(meta, type) {
+    lessonArea.hidden = true;
+    quizArea.hidden = true;
+    emptyState.hidden = false;
+    document.getElementById('emptyTitle').textContent = type === 'lesson'
+      ? `Gün ${meta.day} — ${meta.lesson} konu anlatımı henüz eklenmedi.`
+      : `Gün ${meta.day} — ${meta.lesson} testi henüz eklenmedi.`;
+    document.getElementById('emptyText').textContent = meta.topics;
+  }
+
+  function renderLesson(meta) {
+    const lesson = lessons[selectedDay];
+    resetButton.hidden = true;
+    quizArea.hidden = true;
+    if (!lesson) {
+      showEmpty(meta, 'lesson');
+      return;
+    }
+    emptyState.hidden = true;
+    lessonArea.hidden = false;
+    document.getElementById('lessonNoteTitle').textContent = lesson.title;
+    document.getElementById('lessonNoteSubtitle').textContent = lesson.subtitle;
+    document.getElementById('lessonContent').innerHTML = lesson.html;
+  }
+
+  function renderQuiz(meta) {
     const quiz = data.quizzes[selectedDay];
-
-    document.getElementById('sessionLabel').textContent = `GÜN ${meta.day} · ${meta.lesson.toUpperCase()}`;
-    document.getElementById('pageTitle').textContent = readyDays.has(selectedDay) ? 'Gün Sonu Testi' : 'Program Günü';
-
+    resetButton.hidden = !quiz;
+    lessonArea.hidden = true;
     if (!quiz) {
-      quizArea.hidden = true;
-      emptyState.hidden = false;
-      document.getElementById('emptyTitle').textContent = `Gün ${meta.day} — ${meta.lesson} testi henüz eklenmedi.`;
-      document.getElementById('emptyText').textContent = meta.topics;
+      showEmpty(meta, 'quiz');
       return;
     }
 
@@ -82,6 +138,18 @@
     answers = loadAnswers(selectedDay, quiz.questions.length);
     renderQuestions();
     updateStats();
+  }
+
+  function render() {
+    renderNav();
+    renderTabs();
+    const meta = data.days.find(d => d.day === selectedDay);
+
+    document.getElementById('sessionLabel').textContent = `GÜN ${meta.day} · ${meta.lesson.toUpperCase()}`;
+    document.getElementById('pageTitle').textContent = activeView === 'lesson' ? 'Konu Anlatımı' : 'Gün Sonu Testi';
+
+    if (activeView === 'lesson') renderLesson(meta);
+    else renderQuiz(meta);
   }
 
   function renderQuestions() {
@@ -155,6 +223,7 @@
 
   function retryWrong() {
     const quiz = data.quizzes[selectedDay];
+    if (!quiz) return;
     answers = answers.map((value, index) => value !== null && value !== quiz.questions[index].a ? null : value);
     saveAnswers();
     renderQuestions();
@@ -184,8 +253,10 @@
 
   document.getElementById('menuButton').addEventListener('click', openSidebar);
   overlay.addEventListener('click', closeSidebar);
+  lessonTab.addEventListener('click', () => selectView('lesson'));
+  quizTab.addEventListener('click', () => selectView('quiz'));
   document.getElementById('retryWrongButton').addEventListener('click', retryWrong);
-  document.getElementById('resetButton').addEventListener('click', resetQuiz);
+  resetButton.addEventListener('click', resetQuiz);
   document.getElementById('resetBottomButton').addEventListener('click', resetQuiz);
 
   render();
